@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.vscode/**'
+      - '.idea/**'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  2-logicsig-contracts-validate:
+    name: Run 2-logicsig-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/2-logicsig-contracts-ci.yaml
+
+  2-logicsig-contracts-release:
+    name: Run 2-logicsig-contracts release
+    secrets: inherit
+    uses: ./.github/workflows/2-logicsig-contracts-cd.yaml
+    needs: 2-logicsig-contracts-validate
+
+  2-logicsig-frontend-validate:
+    name: Run 2-logicsig-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/2-logicsig-frontend-ci.yaml
+
+  2-logicsig-frontend-release:
+    name: Run 2-logicsig-frontend release
+    secrets: inherit
+    uses: ./.github/workflows/2-logicsig-frontend-cd.yaml
+    needs: 2-logicsig-frontend-validate
