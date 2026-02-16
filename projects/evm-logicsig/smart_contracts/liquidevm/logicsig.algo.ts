@@ -1,10 +1,10 @@
 /**
  * Liquid EVM LogicSig
- * 
+ *
  * A LogicSig that allows Ethereum wallet addresses to control Algorand accounts.
  * The contract verifies ECDSA (secp256k1) signatures from an Ethereum address,
  * enabling MetaMask and other EVM wallets to sign Algorand transactions.
- * 
+ *
  * How it works:
  * 1. The EVM wallet signs the transaction/group ID using Ethereum's personal_sign
  * 2. The signature (R, S, V) is passed as arg0 to the LogicSig
@@ -12,7 +12,6 @@
  * 4. It derives the Ethereum address from the recovered public key
  * 5. Transaction is approved if the derived address matches the template owner
  */
-
 import { Bytes, Global, LogicSig, op, TemplateVar, Txn, uint64 } from '@algorandfoundation/algorand-typescript'
 import { StaticBytes } from '@algorandfoundation/algorand-typescript/arc4'
 
@@ -21,7 +20,7 @@ const owner = TemplateVar<StaticBytes<20>>('OWNER')
 
 export class LiquidEvmLsig extends LogicSig {
   public program() {
-    // Payload to sign is the 32-byte transaction group ID (if group size > 1) 
+    // Payload to sign is the 32-byte transaction group ID (if group size > 1)
     // otherwise the transaction ID of the current transaction
     const txnIdPayload = Global.groupSize === 1 ? Txn.txId : Global.groupId
 
@@ -30,7 +29,7 @@ export class LiquidEvmLsig extends LogicSig {
     const r = op.extract(sig, 0, 32)
     const s = op.extract(sig, 32, 32)
     const v = op.btoi(op.extract(sig, 64, 1))
-    const recoveryId: uint64 = v - 27  // Ethereum uses 27/28, AVM expects 0/1
+    const recoveryId: uint64 = v - 27 // Ethereum uses 27/28, AVM expects 0/1
 
     // Construct the Ethereum personal_sign message digest
     // Format: keccak256("\x19Ethereum Signed Message:\n32" + txnIdPayload)

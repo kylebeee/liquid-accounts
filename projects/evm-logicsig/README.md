@@ -32,9 +32,6 @@ evm-logicsig/
 │   │   ├── contract.e2e.spec.ts    # E2E tests
 │   │   └── deploy-config.ts        # Deployment configuration
 │   ├── artifacts/                   # Compiled TEAL output
-│   └── index.ts                     # Deployment entry point
-├── .algokit.toml                    # AlgoKit project configuration
-└── package.json
 ```
 
 ## How the Contract Works

@@ -1,7 +1,9 @@
 packages:
   - projects/*
   - projects/use-wallet/packages/*
+  - projects/use-wallet-ui/packages/*
 linkWorkspacePackages: true
 onlyBuiltDependencies:
   - '@algorandfoundation/puya-ts'
   - esbuild
+  - keccak

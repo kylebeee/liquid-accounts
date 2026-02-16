@@ -11,7 +11,6 @@ This monorepo contains:
 - **[Smart Contract](projects/evm-logicsig/)** - LogicSig that verifies ECDSA (secp256k1) signatures from EVM addresses
 - **[SDK](projects/evm-sdk/)** - TypeScript SDK for integrating EVM wallet signing with Algorand
 - **[Frontend](projects/frontend/)** - React demo application with MetaMask integration
-- **[Use Wallet](projects/use-wallet/)** - Enhanced `@txnlab/use-wallet` with MetaMask provider support
 
 ## How It Works
 
@@ -75,9 +74,8 @@ liquid-accounts/
 │   ├── evm-logicsig/    # Smart contract (Algorand TypeScript)
 │   ├── evm-sdk/         # TypeScript SDK
 │   ├── frontend/        # React demo application
-│   └── use-wallet/      # Enhanced @txnlab/use-wallet with MetaMask support
-├── .algokit.toml        # AlgoKit workspace configuration
-└── pnpm-workspace.yaml  # pnpm monorepo configuration
+│   └── use-wallet/      # Enhanced @txnlab/use-wallet with Liquid EVM support
+│   └── use-wallet-ui/   # @txnlab/use-wallet-ui with meta-wallet, signing explainer, welcome dialog
 ```
 
 ## SDK Usage
@@ -101,8 +99,8 @@ const algorand = AlgorandClient.fromEnvironment()
 const sdk = new LiquidEvmSdk({ algorand })
 
 // Get Algorand address for an EVM address
-const algoAddress = await sdk.getAddress({ 
-  evmAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' 
+const algoAddress = await sdk.getAddress({
+  evmAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb'
 })
 
 // Get a transaction signer

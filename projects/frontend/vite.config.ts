@@ -4,5 +4,8 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), nodePolyfills({ include: ['buffer'] })],
+  plugins: [react(), nodePolyfills({ include: ['buffer'], globals: { process: false } })],
+  resolve: {
+    dedupe: ['react', 'react-dom', '@txnlab/use-wallet-react'],
+  },
 })
