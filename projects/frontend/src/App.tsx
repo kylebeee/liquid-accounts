@@ -5,6 +5,7 @@ import { AlgorandClient } from "@algorandfoundation/algokit-utils";
 import algosdk from "algosdk";
 import "./App.css";
 import base32 from "hi-base32";
+import type { Theme } from "@txnlab/use-wallet-ui-react";
 
 const algorand = AlgorandClient.defaultLocalNet();
 algorand.setDefaultValidityWindow(1000);
@@ -123,7 +124,7 @@ function AlgorandActions() {
         setSendState({ status: "signing", payload });
 
         const signedTxns = await signTransactions(groupedTxns.map((t) => t.toByte()));
-        await algorand.client.algod.sendRawTransaction(signedTxns.map((t) => t!)).do();
+        await algorand.client.algod.sendRawTransaction(signedTxns.map((t: Uint8Array | null) => t!)).do();
 
         setSendState({ status: "success", txId: groupedTxns[0].txID(), payload });
       }
@@ -191,14 +192,41 @@ function AlgorandActions() {
   );
 }
 
-function App() {
+function ThemeToggle({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
+  const next = theme === "light" ? "dark" : "light";
+  return (
+    <button
+      onClick={() => setTheme(next)}
+      title={`Switch to ${next} mode`}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 36,
+        height: 36,
+        padding: 0,
+        borderRadius: "50%",
+        background: "transparent",
+        border: "1px solid #666",
+        cursor: "pointer",
+        fontSize: 18,
+        lineHeight: 1,
+      }}
+    >
+      {theme === "light" ? "\u{263D}" : "\u{2600}"}
+    </button>
+  );
+}
+
+export default function App({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   return (
     <div className="container">
-      <WalletButton style={{ alignSelf: "flex-end" }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "flex-end" }}>
+        <ThemeToggle theme={theme} setTheme={setTheme} />
+        <WalletButton />
+      </div>
       <h1>Liquid EVM Accounts</h1>
       <AlgorandActions />
     </div>
   );
 }
-
-export default App;

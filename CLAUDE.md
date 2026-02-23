@@ -7,3 +7,7 @@ See [AGENTS.md](./AGENTS.md) for:
 - Available skills and when to use them
 - MCP tools for documentation and code search
 - Development workflows for Algorand smart contracts
+
+## Build
+
+- After finishing changes in `projects/use-wallet-ui/`, always run `pnpm build` (from that directory) before considering the task complete.

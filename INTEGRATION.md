@@ -2,11 +2,12 @@
 
 In case you want to experiment with liquid-evm-accounts in your frontend:
 
-## 1. Swap & install packages
+## 1. Install packages
+
+Use npm aliases to install the experimental `@d13co` builds under the `@txnlab` package names. This way your imports stay as `@txnlab/use-wallet-react` — no find-and-replace needed.
 
 ```bash
-pnpm remove @txnlab/use-wallet-react
-pnpm add @d13co/use-wallet-react @d13co/use-wallet-ui-react liquid-accounts-evm @metamask/sdk
+pnpm add @txnlab/use-wallet@npm:@d13co/use-wallet @txnlab/use-wallet-react@npm:@d13co/use-wallet-react @txnlab/use-wallet-ui-react liquid-accounts-evm @metamask/sdk
 ```
 
 Note: This uses use-wallet v4. Migration should be straightforward/painless if you are on v2 or v3:
@@ -14,21 +15,15 @@ Note: This uses use-wallet v4. Migration should be straightforward/painless if y
 - https://txnlab.gitbook.io/use-wallet/v3/guides/migrating-from-v2.x
 - https://txnlab.gitbook.io/use-wallet/guides/migrating-from-v3.x
 
-## 2. Find and replace imports in your codebase
-
-```bash
-grep -rl '@txnlab/use-wallet' src/ | xargs sed -i 's/@txnlab\/use-wallet/@d13co\/use-wallet/g'
-```
-
-## 3. Usage
+## 2. Usage
 
 ```tsx
 import {
   NetworkId, WalletId, WalletManager, WalletProvider,
-} from '@d13co/use-wallet-react'
+} from '@txnlab/use-wallet-react'
 import {
   WalletUIProvider, WalletButton,
-} from '@d13co/use-wallet-ui-react'
+} from '@txnlab/use-wallet-ui-react'
 
 // Add metamask to your use-wallet config
 
@@ -65,7 +60,7 @@ function App() {
 - Theme injection (`'light'` | `'dark'` | `'system'`)
 - Optional `queryClient` prop if you already have a `@tanstack/react-query` provider
 
-## 4. Opt in EVM account to assets
+## 3. Opt in EVM account to assets
 
 After connecting your EVM account, you can opt it in to assets via:
 

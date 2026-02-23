@@ -1,10 +1,10 @@
 import { Buffer } from "buffer";
-globalThis.Buffer = Buffer;
+(globalThis as unknown as Record<string, unknown>).Buffer = Buffer;
 
-import { StrictMode } from "react";
+import { StrictMode, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { LogLevel, WalletProvider } from "@txnlab/use-wallet-react";
-import { WalletUIProvider } from "@txnlab/use-wallet-ui-react";
+import { WalletUIProvider, type Theme } from "@txnlab/use-wallet-ui-react";
 import "@txnlab/use-wallet-ui-react/dist/style.css";
 import { WalletManager, WalletId } from "@txnlab/use-wallet-react";
 import "./index.css";
@@ -24,12 +24,31 @@ const walletManager = new WalletManager({
   defaultNetwork: "localnet",
 });
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+function Root() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem("app-theme");
+    if (stored === "light" || stored === "dark") return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("app-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+    document.documentElement.style.color = theme === "dark" ? "rgba(255, 255, 255, 0.87)" : "#213547";
+    document.documentElement.style.backgroundColor = theme === "dark" ? "#242424" : "#ffffff";
+  }, [theme]);
+
+  return (
     <WalletProvider manager={walletManager}>
-      <WalletUIProvider>
-        <App />
+      <WalletUIProvider theme={theme}>
+        <App theme={theme} setTheme={setTheme} />
       </WalletUIProvider>
     </WalletProvider>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <Root />
   </StrictMode>,
 );
