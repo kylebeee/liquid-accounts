@@ -13,7 +13,8 @@ import App from "./App.tsx";
 const walletManager = new WalletManager({
   options: {
     debug: true,
-    logLevel: LogLevel.DEBUG
+    logLevel: LogLevel.DEBUG,
+    resetNetwork: true,
   },
   wallets: [
     WalletId.METAMASK,
