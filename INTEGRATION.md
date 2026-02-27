@@ -13,22 +13,26 @@ Use npm aliases to install the experimental `@d13co` builds under the `@txnlab` 
 pnpm add @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
          @txnlab/use-wallet-react@npm:@d13co/use-wallet-react@latest \
          @txnlab/use-wallet-ui-react@npm:@d13co/use-wallet-ui-react@latest \
-         liquid-accounts-evm@latest \
-         @rainbow-me/rainbowkit wagmi @wagmi/core viem @tanstack/react-query
+         liquid-accounts-evm@latest @d13co/liquid-ui@latest \
+         @rainbow-me/rainbowkit wagmi@2 @wagmi/core@2 viem @tanstack/react-query
+```
 
+```bash
 # npm
 npm install @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
             @txnlab/use-wallet-react@npm:@d13co/use-wallet-react@latest \
             @txnlab/use-wallet-ui-react@npm:@d13co/use-wallet-ui-react@latest \
-            liquid-accounts-evm@latest \
-            @rainbow-me/rainbowkit wagmi @wagmi/core viem @tanstack/react-query
+            liquid-accounts-evm@latest @d13co/liquid-ui@latest \
+            @rainbow-me/rainbowkit wagmi@2 @wagmi/core@2 viem @tanstack/react-query
+```
 
+```bash
 # yarn
 yarn add @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
          @txnlab/use-wallet-react@npm:@d13co/use-wallet-react@latest \
          @txnlab/use-wallet-ui-react@npm:@d13co/use-wallet-ui-react@latest \
-         liquid-accounts-evm@latest \
-         @rainbow-me/rainbowkit wagmi @wagmi/core viem @tanstack/react-query
+         liquid-accounts-evm@latest @d13co/liquid-ui@latest \
+         @rainbow-me/rainbowkit wagmi@2 @wagmi/core@2 viem @tanstack/react-query
 ```
 
 **Recommended (Allbridge cross-chain bridge support):**
@@ -65,6 +69,7 @@ export default defineConfig({
       '@tanstack/react-query',
       '@txnlab/use-wallet-react',
       'algosdk',
+      '@algorandfoundation/algokit-utils',
       'wagmi',
       '@wagmi/core',
       'viem',
