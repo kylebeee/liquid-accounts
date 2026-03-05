@@ -2,6 +2,15 @@
 
 In case you want to experiment with liquid-evm-accounts in your frontend:
 
+> [!IMPORTANT]
+> **DO NOT PERFORM PUBLIC BETA TESTING YET**
+>
+> **The logic sig standard may still evolve, which would impact the ALGO x EVM derived addresses. If you onboard public beta testers, future changes would require you to support them in recovering funds from outdated derivations or migrate to the latest version.**
+>
+> Tools aiding migrations/recovery will not be in scope for this project while it is in alpha/unstable state.
+>
+> Private testing is fine, so long as you are aware that future versions may derive different Algorand addresses, and you would need to recover your own funds with the corresponding version of this repo.
+
 ## 1. Install packages
 
 Use npm aliases to install the experimental `@d13co` builds under the `@txnlab` package names. This way your imports stay as `@txnlab/use-wallet-react` — no find-and-replace needed.
