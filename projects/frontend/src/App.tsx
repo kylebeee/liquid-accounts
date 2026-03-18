@@ -68,6 +68,7 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
   const [sendState, setSendState] = useState<SendState>({ status: "idle" });
   const [lastPayload, setLastPayload] = useState<PayloadInfo | undefined>();
   const [assetId, setAssetId] = useState("");
+  const [appIdInput, setAppIdInput] = useState("");
 
   const algorand = useMemo(() => {
     const client = getAlgorandClient(network);
@@ -86,33 +87,127 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
     }
   }, [network]);
 
-  const optInToAsset = async () => {
+  const optInToAsset = () => wrapAsync(async () => {
     if (!activeAccount) return;
     const id = parseInt(assetId, 10);
     if (isNaN(id) || id <= 0) return;
 
+    const txn = await algorand.createTransaction.assetOptIn({
+      sender: activeAccount.address,
+      assetId: BigInt(id),
+      note: new TextEncoder().encode("Hello World"),
+    });
+    await signSingleTxn(txn);
+  });
+
+  const signSingleTxn = async (txn: algosdk.Transaction) => {
+    const payload: PayloadInfo = { bytes: txn.rawTxID(), type: "Txn ID" };
+    setLastPayload(payload);
+    setSendState({ status: "signing", payload });
+
+    const signedTxns = await signTransactions([txn.toByte()]);
+    await algorand.client.algod.sendRawTransaction(signedTxns[0]!).do();
+
+    setSendState({ status: "success", txId: txn.txID(), payload });
+  };
+
+  const signGroupTxns = async (txns: algosdk.Transaction[]) => {
+    const groupedTxns = algosdk.assignGroupID(txns);
+    const payload: PayloadInfo = { bytes: groupedTxns[0].group!, type: "Group ID" };
+    setLastPayload(payload);
+    setSendState({ status: "signing", payload });
+
+    const signedTxns = await signTransactions(groupedTxns.map((t) => t.toByte()));
+    await algorand.client.algod.sendRawTransaction(signedTxns.map((t: Uint8Array | null) => t!)).do();
+
+    setSendState({ status: "success", txId: groupedTxns[0].txID(), payload });
+  };
+
+  const wrapAsync = async (fn: () => Promise<void>) => {
     try {
       setSendState({ status: "idle" });
       setLastPayload(undefined);
-
-      const txn = await algorand.createTransaction.assetOptIn({
-        sender: activeAccount.address,
-        assetId: BigInt(id),
-      });
-
-      const payload: PayloadInfo = { bytes: txn.rawTxID(), type: "Txn ID" };
-      setLastPayload(payload);
-      setSendState({ status: "signing", payload });
-
-      const signedTxns = await signTransactions([txn.toByte()]);
-      await algorand.client.algod.sendRawTransaction(signedTxns[0]!).do();
-
-      setSendState({ status: "success", txId: txn.txID(), payload });
+      await fn();
     } catch (e) {
       const payload = lastPayload ?? { bytes: new Uint8Array(), type: "Txn ID" as const };
       setSendState({ status: "error", message: (e as Error).message, payload });
     }
   };
+
+  const sendCloseOut = () => wrapAsync(async () => {
+    if (!activeAccount) return;
+    const txn = await algorand.createTransaction.payment({
+      sender: activeAccount.address,
+      receiver: activeAccount.address,
+      amount: (0).algos(),
+      closeRemainderTo: activeAccount.address,
+      note: new TextEncoder().encode("Hello World"),
+    });
+    await signSingleTxn(txn);
+  });
+
+  const sendAppCall = () => wrapAsync(async () => {
+    if (!activeAccount) return;
+    const appId = parseInt(appIdInput, 10);
+    if (isNaN(appId) || appId <= 0) return;
+    const txn = await algorand.createTransaction.appCall({
+      sender: activeAccount.address,
+      appId: BigInt(appId),
+      note: new TextEncoder().encode("Hello World"),
+    });
+    await signSingleTxn(txn);
+  });
+
+  const sendKeyReg = () => wrapAsync(async () => {
+    if (!activeAccount) return;
+    const sp = await algorand.client.algod.getTransactionParams().do();
+    const txn = algosdk.makeKeyRegistrationTxnWithSuggestedParamsFromObject({
+      sender: activeAccount.address,
+      suggestedParams: sp,
+      nonParticipation: true,
+      note: new TextEncoder().encode("Hello World"),
+    });
+    await signSingleTxn(txn);
+  });
+
+  const sendAssetTransfer = () => wrapAsync(async () => {
+    if (!activeAccount) return;
+    const id = parseInt(assetId, 10);
+    if (isNaN(id) || id <= 0) return;
+    const txn = await algorand.createTransaction.assetTransfer({
+      sender: activeAccount.address,
+      receiver: activeAccount.address,
+      assetId: BigInt(id),
+      amount: 0n,
+      note: new TextEncoder().encode("Hello World"),
+    });
+    await signSingleTxn(txn);
+  });
+
+  const sendMixedGroup = () => wrapAsync(async () => {
+    if (!activeAccount) return;
+    const appId = parseInt(appIdInput, 10);
+    if (isNaN(appId) || appId <= 0) return;
+    const sp = await algorand.client.algod.getTransactionParams().do();
+    const payTxn = await algorand.createTransaction.payment({
+      sender: activeAccount.address,
+      receiver: activeAccount.address,
+      amount: (0).algos(),
+      note: new TextEncoder().encode("Hello World"),
+    });
+    const appTxn = await algorand.createTransaction.appCall({
+      sender: activeAccount.address,
+      appId: BigInt(appId),
+      note: new TextEncoder().encode("Hello World"),
+    });
+    const keyregTxn = algosdk.makeKeyRegistrationTxnWithSuggestedParamsFromObject({
+      sender: activeAccount.address,
+      suggestedParams: sp,
+      nonParticipation: true,
+      note: new TextEncoder().encode("Hello World"),
+    });
+    await signGroupTxns([payTxn, appTxn, keyregTxn]);
+  });
 
   const send = async (numTxns: number, rekey = false) => {
     if (!activeAccount) return;
@@ -127,7 +222,7 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
           receiver: activeAccount.address,
           amount: (0).algos(),
           ...(rekey ? { rekeyTo: activeAccount.address } : {}),
-          note: crypto.getRandomValues(new Uint8Array(4)),
+          note: new TextEncoder().encode("Hello World"),
         });
 
         const payload: PayloadInfo = { bytes: txn.rawTxID(), type: "Txn ID" };
@@ -147,7 +242,7 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
               receiver: activeAccount.address,
               amount: (0).algos(),
               ...(rekey ? { rekeyTo: activeAccount.address } : {}),
-              note: crypto.getRandomValues(new Uint8Array(4)),
+              note: new TextEncoder().encode("Hello World"),
             }),
           );
         }
@@ -185,6 +280,7 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
         </a>
       </div>
       <div className="card">
+        <p style={{ marginBottom: 8, opacity: 0.6, fontSize: 13 }}>Payments</p>
         <button onClick={() => send(1)} disabled={sendState.status === "signing"}>
           Send 1x
         </button>{" "}
@@ -194,11 +290,31 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
         <button onClick={() => send(1, true)} disabled={sendState.status === "signing"}>
           Send Rekey
         </button>{" "}
+        <button onClick={sendCloseOut} disabled={sendState.status === "signing"}>
+          Close Out
+        </button>
       </div>
       <div className="card">
+        <p style={{ marginBottom: 8, opacity: 0.6, fontSize: 13 }}>Assets</p>
         <input type="text" placeholder="Asset ID" value={assetId} onChange={(e) => setAssetId(e.target.value)} style={{ marginRight: 8 }} />
         <button onClick={optInToAsset} disabled={sendState.status === "signing" || !assetId}>
           Opt In ASA
+        </button>{" "}
+        <button onClick={sendAssetTransfer} disabled={sendState.status === "signing" || !assetId}>
+          Transfer ASA
+        </button>
+      </div>
+      <div className="card">
+        <p style={{ marginBottom: 8, opacity: 0.6, fontSize: 13 }}>Other Types</p>
+        <input type="text" placeholder="App ID" value={appIdInput} onChange={(e) => setAppIdInput(e.target.value)} style={{ marginRight: 8 }} />
+        <button onClick={sendAppCall} disabled={sendState.status === "signing" || !appIdInput}>
+          App Call
+        </button>{" "}
+        <button onClick={sendKeyReg} disabled={sendState.status === "signing"}>
+          Key Reg
+        </button>{" "}
+        <button onClick={sendMixedGroup} disabled={sendState.status === "signing" || !appIdInput}>
+          Mixed Group
         </button>
       </div>
       {sendState.status !== "idle" && lastPayload && <PayloadDisplay payload={lastPayload} />}
