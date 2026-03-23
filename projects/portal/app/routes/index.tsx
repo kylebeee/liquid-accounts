@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Wallet, Zap, Shield, Split, Link2, MousePointerClick, CheckCircle } from "lucide-react";
+import { ArrowRight, Wallet, Zap, Shield, Split, Link2, MousePointerClick, CheckCircle, ArrowUpRight } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import TypingText from "~/components/ui/typing-text";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -23,11 +23,7 @@ function LandingPage() {
             <svg className="h-28 sm:h-36 md:h-48 fill-primary" viewBox="0 0 113 113.4" aria-label="Algorand">
               <polygon points="19.6 113.4 36 85 52.4 56.7 68.7 28.3 71.4 23.8 72.6 28.3 77.6 47 72 56.7 55.6 85 39.3 113.4 58.9 113.4 75.3 85 83.8 70.3 87.8 85 95.4 113.4 113 113.4 105.4 85 97.8 56.7 95.8 49.4 108 28.3 90.2 28.3 89.6 26.2 83.4 3 82.6 0 65.5 0 65.1 0.6 49.1 28.3 32.7 56.7 16.4 85 0 113.4 19.6 113.4" />
             </svg>
-            <span
-              className="text-[100px] sm:md:text-[122px] md:text-[144px] font-bold bg-clip-text text-[#CCD0D3]"
-            >
-              x
-            </span>
+            <span className="text-[100px] sm:md:text-[122px] md:text-[144px] font-bold bg-clip-text text-[#CCD0D3]">x</span>
             <svg className="h-28 sm:h-36 md:h-48" viewBox="420 80 1080 1760" aria-label="Ethereum">
               <path d="m959.8 80.7-539.7 895.6 539.7-245.3z" fill="#8a92b2" />
               <path d="m959.8 731-539.7 245.3 539.7 319.1z" fill="#62688f" />
@@ -57,14 +53,13 @@ function LandingPage() {
             />{" "}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Connect any EVM wallet to send transactions, manage assets, and bridge tokens on Algorand &mdash; no new wallet
-            needed.
+            Connect any EVM wallet to send transactions, manage assets, and bridge tokens on Algorand &mdash; no new wallet needed.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button size="lg" asChild>
               <Link to="/app">
-                Manage Account
-                <ArrowRight className="ml-2 h-4 w-4" />
+                Launch
+                <ArrowUpRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
@@ -91,8 +86,8 @@ function LandingPage() {
               <CardTitle>Bring Your Own</CardTitle>
             </CardHeader>
             <CardContent className="text-muted-foreground">
-              Connect your existing Ethereum wallet. No new seed phrases, no new apps. Your EVM address automatically maps to an
-              Algorand account.
+              Connect your existing Ethereum wallet. No new seed phrases, no new apps. Your EVM address automatically maps to an Algorand
+              account.
             </CardContent>
           </Card>
           <Card>
@@ -101,7 +96,8 @@ function LandingPage() {
               <CardTitle>Self Custodial</CardTitle>
             </CardHeader>
             <CardContent className="text-muted-foreground">
-              Only your signature can authorize transactions. Cryptographic ECDSA verification happens entirely on-chain via an Algorand Smart Account.
+              Only your signature can authorize transactions. Cryptographic ECDSA verification happens entirely on-chain via an Algorand
+              Smart Account.
             </CardContent>
           </Card>
           <Card>
@@ -110,7 +106,8 @@ function LandingPage() {
               <CardTitle>Domain Isolation</CardTitle>
             </CardHeader>
             <CardContent className="text-muted-foreground">
-              AVM and EVM domains are fully separated. Sign Algorand x EVM transactions with EIP-712 typed data, eliminating the risk of cross-network contamination.
+              AVM and EVM domains are fully separated. Sign Algorand x EVM transactions with EIP-712 typed data, eliminating the risk of
+              cross-network contamination.
             </CardContent>
           </Card>
           {/* <Card>
@@ -136,7 +133,9 @@ function LandingPage() {
               </div>
               <Link2 className="mt-4 h-8 w-8 text-muted-foreground" />
               <h3 className="mt-3 text-lg font-semibold">Connect</h3>
-              <p className="mt-2 text-sm text-muted-foreground">Connect your MetaMask or any EVM wallet to Algorand x EVM compatible dApps.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Connect your MetaMask or any EVM wallet to Algorand x EVM compatible dApps.
+              </p>
             </div>
             <div className="flex flex-col items-center text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">
@@ -144,9 +143,7 @@ function LandingPage() {
               </div>
               <MousePointerClick className="mt-4 h-8 w-8 text-muted-foreground" />
               <h3 className="mt-3 text-lg font-semibold">Sign</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Approve transactions with isolated EIP-712 typed data signing.
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">Approve transactions with isolated EIP-712 typed data signing.</p>
             </div>
             <div className="flex flex-col items-center text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg">
@@ -169,8 +166,8 @@ function LandingPage() {
         <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button size="lg" asChild>
             <Link to="/app">
-              Manage Account
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Launch
+              <ArrowUpRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>

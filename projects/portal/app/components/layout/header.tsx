@@ -1,17 +1,15 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { ArrowUpRight, Menu, X } from 'lucide-react'
 import { cn } from '~/lib/utils'
 
-const navItems = [
-  { label: 'Manage Account', to: '/app' as const },
-  { label: 'Docs', to: '/docs' as const },
-]
+const navItems = [{ label: 'Docs', to: '/docs' as const }]
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const routerState = useRouterState()
   const isLanding = routerState.location.pathname === '/'
+  const isApp = routerState.location.pathname.startsWith('/app')
 
   return (
     <header
@@ -28,26 +26,37 @@ export function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-6 md:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
+        <div className="hidden items-center gap-6 md:flex">
+          <nav className="flex items-center gap-6">
+            {navItems.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                activeProps={{ className: 'text-foreground' }}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <a
+              href="https://github.com/algorandfoundation/x-accounts"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              activeProps={{ className: 'text-foreground' }}
             >
-              {item.label}
+              GitHub
+            </a>
+          </nav>
+          {!isApp && (
+            <Link
+              to="/app"
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Launch
+              <ArrowUpRight size={16} />
             </Link>
-          ))}
-          <a
-            href="https://github.com/algorandfoundation/x-accounts"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            GitHub
-          </a>
-        </nav>
+          )}
+        </div>
 
         {/* Mobile toggle */}
         <button
@@ -61,7 +70,7 @@ export function Header() {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <nav className="border-t px-4 pb-4 md:hidden">
+        <nav className="border-t p-4 md:hidden">
           {navItems.map((item) => (
             <Link
               key={item.to}
@@ -81,6 +90,16 @@ export function Header() {
           >
             GitHub
           </a>
+          {!isApp && (
+            <Link
+              to="/app"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              onClick={() => setMobileOpen(false)}
+            >
+              Launch
+              <ArrowUpRight size={16} />
+            </Link>
+          )}
         </nav>
       )}
     </header>
