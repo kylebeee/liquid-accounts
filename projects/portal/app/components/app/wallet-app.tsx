@@ -1,24 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useWallet } from '@txnlab/use-wallet-react'
 import { WalletButton } from '@txnlab/use-wallet-ui-react'
-import { WalletProviders } from './wallet-providers'
+import { WalletProviders, wagmiConfig } from './wallet-providers'
 import { WalletDashboard } from './wallet-dashboard'
-
-/** Synchronously check if wagmi has a stored session in localStorage. */
-function hasWagmiStoredSession(): boolean {
-  try {
-    return !!localStorage.getItem('wagmi.recentConnectorId')
-  } catch {
-    return false
-  }
-}
 
 /**
  * Listens to wallet state and calls `onResolved` once we know the final
  * connection status (connected or definitively disconnected).
  * Renders nothing — lives inside WalletProviders only to access the hook.
  */
-function WalletResolver({ hadSession, onResolved }: { hadSession: boolean; onResolved: () => void }) {
+function WalletResolver({ onResolved }: { onResolved: () => void }) {
   const { activeAddress, isReady } = useWallet()
   const firedRef = useRef(false)
 
@@ -27,11 +18,30 @@ function WalletResolver({ hadSession, onResolved }: { hadSession: boolean; onRes
     if (activeAddress) {
       firedRef.current = true
       onResolved()
-    } else if (isReady && !hadSession) {
-      firedRef.current = true
-      onResolved()
+      return
     }
-  }, [activeAddress, isReady, hadSession, onResolved])
+    if (!isReady) return
+
+    // Manager is ready but no wallet connected.
+    // Subscribe to wagmi status — resolve once it settles to disconnected
+    // (no session to restore) or connected (Bridge will sync it).
+    const check = () => {
+      const { status, connections } = wagmiConfig.state
+      if (status === 'disconnected' && connections.size === 0) {
+        firedRef.current = true
+        onResolved()
+        return true
+      }
+      return false
+    }
+    // Already settled?
+    if (check()) return
+    // Otherwise wait for wagmi to settle
+    return wagmiConfig.subscribe(
+      (state) => `${state.status}:${state.connections.size}`,
+      () => check(),
+    )
+  }, [activeAddress, isReady, onResolved])
 
   return null
 }
@@ -52,21 +62,22 @@ function WalletAppContent() {
 }
 
 export default function WalletApp() {
-  const hadSession = useRef(hasWagmiStoredSession())
   const [resolved, setResolved] = useState(false)
+  const onResolved = useCallback(() => setResolved(true), [])
 
-  return (
-    <WalletProviders>
-      {!resolved ? (
+  const content = useMemo(() => {
+    if (!resolved) {
+      return (
         <>
           <div className="flex justify-center py-12">
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-muted border-t-primary" />
           </div>
-          <WalletResolver hadSession={hadSession.current} onResolved={() => setResolved(true)} />
+          <WalletResolver onResolved={onResolved} />
         </>
-      ) : (
-        <WalletAppContent />
-      )}
-    </WalletProviders>
-  )
+      )
+    }
+    return <WalletAppContent />
+  }, [resolved, onResolved])
+
+  return <WalletProviders>{content}</WalletProviders>
 }
