@@ -26,8 +26,7 @@ Use npm aliases to install the experimental `@d13co` builds under the `@txnlab` 
 pnpm add @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
          @txnlab/use-wallet-react@npm:@d13co/use-wallet-react@latest \
          @txnlab/use-wallet-ui-react@npm:@d13co/use-wallet-ui-react@latest \
-         algo-x-evm-sdk@latest @d13co/algo-x-evm-ui@latest \
-         @rainbow-me/rainbowkit wagmi@2 @wagmi/core@2 viem @tanstack/react-query
+         algo-x-evm-sdk@latest @d13co/algo-x-evm-ui@latest @rainbow-me/rainbowkit
 ```
 
 ```bash
@@ -35,8 +34,7 @@ pnpm add @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
 npm install @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
             @txnlab/use-wallet-react@npm:@d13co/use-wallet-react@latest \
             @txnlab/use-wallet-ui-react@npm:@d13co/use-wallet-ui-react@latest \
-            algo-x-evm-sdk@latest @d13co/algo-x-evm-ui@latest \
-            @rainbow-me/rainbowkit wagmi@2 @wagmi/core@2 viem @tanstack/react-query
+            algo-x-evm-sdk@latest @d13co/algo-x-evm-ui@latest @rainbow-me/rainbowkit
 ```
 
 ```bash
@@ -44,16 +42,15 @@ npm install @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
 yarn add @txnlab/use-wallet@npm:@d13co/use-wallet@latest \
          @txnlab/use-wallet-react@npm:@d13co/use-wallet-react@latest \
          @txnlab/use-wallet-ui-react@npm:@d13co/use-wallet-ui-react@latest \
-         algo-x-evm-sdk@latest @d13co/algo-x-evm-ui@latest \
-         @rainbow-me/rainbowkit wagmi@2 @wagmi/core@2 viem @tanstack/react-query
+         algo-x-evm-sdk@latest @d13co/algo-x-evm-ui@latest @rainbow-me/rainbowkit
 ```
 
 **Recommended (Allbridge cross-chain bridge support):**
 
 ```bash
-pnpm add @allbridge/bridge-core-sdk buffer
-# npm install @allbridge/bridge-core-sdk buffer
-# yarn add @allbridge/bridge-core-sdk buffer
+pnpm add @allbridge/bridge-core-sdk
+# npm install @allbridge/bridge-core-sdk
+# yarn add @allbridge/bridge-core-sdk
 ```
 
 Note: This uses use-wallet v4. Migration should be straightforward/painless if you are on v2 or v3:
@@ -61,38 +58,7 @@ Note: This uses use-wallet v4. Migration should be straightforward/painless if y
 - https://txnlab.gitbook.io/use-wallet/v3/guides/migrating-from-v2.x
 - https://txnlab.gitbook.io/use-wallet/guides/migrating-from-v3.x
 
-## 2. Vite config
-
-Add the `buffer` polyfill alias and deduplication entries:
-
-```ts
-// vite.config.ts
-export default defineConfig({
-  plugins: [react()],
-  define: {
-    global: 'globalThis',
-  },
-  resolve: {
-    alias: {
-      buffer: 'buffer',
-    },
-    dedupe: [
-      'react',
-      'react-dom',
-      '@tanstack/react-query',
-      '@txnlab/use-wallet-react',
-      'wagmi',
-      '@wagmi/core',
-      '@rainbow-me/rainbowkit',
-    ],
-  },
-  optimizeDeps: {
-    include: ['buffer'],
-  },
-})
-```
-
-## 3. Usage
+## 2. Usage
 
 1. Add global polyfills for the bridge SDK (at the top of your entry file)
 2. Create a wagmi config with `algorandChain` from `algo-x-evm-sdk`
@@ -103,8 +69,6 @@ export default defineConfig({
 ```tsx
 // At the top of your entry file (e.g. main.tsx)
 // Required by the Allbridge bridge SDK
-import { Buffer } from 'buffer'
-;(globalThis as any).Buffer = Buffer
 if (!(globalThis as any).TronWebProto) {
   ;(globalThis as any).TronWebProto = { Transaction: {} }
 }
@@ -193,3 +157,67 @@ The bridge UI is built into `WalletUIProvider`. No additional setup is required 
 The `buffer` package and `TronWebProto` stub in your entry file are required by Allbridge's bundled TronWeb dependency.
 
 Access it from `{WalletButton}` → ⚡ Manage → # Bridge
+
+## Troubleshooting
+
+### `Buffer` errors
+
+Install `buffer`
+
+```bash
+pnpm add buffer
+# npm install buffer
+# yarn add buffer
+```
+
+Add the `buffer` polyfill:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  plugins: [react()],
+  define: {
+    global: 'globalThis',
+  },
+  resolve: {
+    alias: {
+      buffer: 'buffer',
+    },
+  },
+  optimizeDeps: {
+    include: ['buffer'],
+  },
+})
+```
+
+```tsx
+// At the top of your entry file (e.g. main.tsx)
+// Required by the Allbridge bridge SDK
+import { Buffer } from 'buffer'
+;(globalThis as any).Buffer = Buffer
+if (!(globalThis as any).TronWebProto) {
+  ;(globalThis as any).TronWebProto = { Transaction: {} }
+}
+```
+
+### Package resolution errors
+
+Add deduplication entries:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    dedupe: [
+      'react',
+      'react-dom',
+      '@tanstack/react-query',
+      '@txnlab/use-wallet-react',
+      'wagmi',
+      '@wagmi/core',
+      '@rainbow-me/rainbowkit',
+    ],
+  },
+})
+```

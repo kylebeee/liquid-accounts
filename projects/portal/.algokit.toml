@@ -1,0 +1,9 @@
+[algokit]
+min_version = "v2.0.0"
+
+[project]
+type = "frontend"
+name = 'portal'
+
+[project.run]
+build = { commands = ['pnpm run build'], description = 'Build portal' }
