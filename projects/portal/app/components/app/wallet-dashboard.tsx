@@ -26,7 +26,7 @@ export function WalletDashboard() {
   const { activeNetwork } = useNetwork()
   const queryClient = useQueryClient()
   const isFetching = useIsFetching()
-  const { bridge, openBridge } = useBridgeDialog()
+  const { bridge, openBridge, enableBridge } = useBridgeDialog()
 
   const [showAvailable, setShowAvailable] = useState(() => {
     try {
@@ -212,6 +212,7 @@ export function WalletDashboard() {
     <div>
       <ManagePanel
         wideBreakpoint={800}
+        onBridgeEnter={enableBridge}
         displayBalance={displayBalance}
         showAvailableBalance={showAvailable}
         onToggleBalance={toggleBalance}
@@ -226,6 +227,7 @@ export function WalletDashboard() {
         isRefreshing={isFetching > 0}
         onExplore={handleExplore}
         activeAddress={activeAddress}
+        evmAddress={evmAddress}
         walletName={walletName}
         walletIcon={walletIcon}
         onDisconnect={handleDisconnect}
