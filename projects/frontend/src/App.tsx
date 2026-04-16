@@ -64,11 +64,13 @@ function PayloadDisplay({ payload }: { payload: PayloadInfo }) {
 }
 
 function AlgorandActions({ network }: { network: AlgorandNetwork }) {
-  const { activeAccount, signTransactions } = useWallet();
+  const { activeAccount, signTransactions, activeWalletAccounts } = useWallet();
   const [sendState, setSendState] = useState<SendState>({ status: "idle" });
   const [lastPayload, setLastPayload] = useState<PayloadInfo | undefined>();
   const [assetId, setAssetId] = useState("");
   const [appIdInput, setAppIdInput] = useState("");
+
+  const canMultiSign = activeWalletAccounts && activeWalletAccounts.length >= 2;
 
   const algorand = useMemo(() => {
     const client = getAlgorandClient(network);
@@ -209,6 +211,41 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
     await signGroupTxns([payTxn, appTxn, keyregTxn]);
   });
 
+  const sendMultiSigner = () => wrapAsync(async () => {
+    if (!activeWalletAccounts || activeWalletAccounts.length < 2) return;
+
+    const firstWallet = activeWalletAccounts[0];
+    const secondWallet = activeWalletAccounts[1];
+    const firstAccount = firstWallet.address;
+    const secondAccount = secondWallet.address;
+
+    const txn1 = await algorand.createTransaction.payment({
+      sender: firstAccount,
+      receiver: firstAccount,
+      amount: (0).algos(),
+      note: new TextEncoder().encode("Multi-signer txn 1"),
+    });
+
+    const txn2 = await algorand.createTransaction.payment({
+      sender: secondAccount,
+      receiver: secondAccount,
+      amount: (0).algos(),
+      note: new TextEncoder().encode("Multi-signer txn 2"),
+    });
+
+    const groupedTxns = algosdk.assignGroupID([txn1, txn2]);
+    const payload: PayloadInfo = { bytes: groupedTxns[0].group!, type: "Group ID" };
+    setLastPayload(payload);
+    setSendState({ status: "signing", payload });
+
+    const txnBytes = groupedTxns.map((t) => t.toByte());
+
+    const signedTxns = await signTransactions(txnBytes);
+    await algorand.client.algod.sendRawTransaction(signedTxns.map((t: Uint8Array | null) => t!)).do();
+
+    setSendState({ status: "success", txId: groupedTxns[0].txID(), payload });
+  });
+
   const send = async (numTxns: number, rekey = false) => {
     if (!activeAccount) return;
 
@@ -316,6 +353,15 @@ function AlgorandActions({ network }: { network: AlgorandNetwork }) {
         <button onClick={sendMixedGroup} disabled={sendState.status === "signing" || !appIdInput}>
           Mixed Group
         </button>
+      </div>
+      <div className="card">
+        <p style={{ marginBottom: 8, opacity: 0.6, fontSize: 13 }}>Multi-Signer</p>
+        <button onClick={sendMultiSigner} disabled={sendState.status === "signing" || !canMultiSign}>
+          Multi-Signer Group
+        </button>
+        {!canMultiSign && (
+          <p style={{ fontSize: 12, opacity: 0.5, marginTop: 4 }}>Connect 2+ wallets to enable</p>
+        )}
       </div>
       {sendState.status !== "idle" && lastPayload && <PayloadDisplay payload={lastPayload} />}
       {sendState.status === "signing" && (
